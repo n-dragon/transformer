@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ImmoAgent — Trouvez votre logement</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <span class="logo-icon">🏠</span>
+          <span class="logo-text">ImmoAgent</span>
+        </div>
+        <p class="logo-sub">Powered by Claude AI</p>
+      </div>
+
+      <!-- Agent configurator -->
+      <div class="sidebar-section">
+        <h3 class="section-title">Créer un agent</h3>
+        <form id="agentForm" class="agent-form">
+
+          <div class="form-group">
+            <label>Nom de l'agent</label>
+            <input type="text" id="agentName" placeholder="Mon agent Paris" value="Mon agent" />
+          </div>
+
+          <div class="form-group">
+            <label>Type de recherche</label>
+            <div class="radio-group">
+              <label class="radio-option">
+                <input type="radio" name="listingType" value="rent" checked />
+                <span>🔑 Louer</span>
+              </label>
+              <label class="radio-option">
+                <input type="radio" name="listingType" value="sale" />
+                <span>🏡 Acheter</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Ville</label>
+            <input type="text" id="location" placeholder="Paris, Lyon, Bordeaux..." value="Paris" />
+          </div>
+
+          <div class="form-group">
+            <label>Type de bien</label>
+            <select id="propertyType">
+              <option value="any">Tous types</option>
+              <option value="apartment">Appartement</option>
+              <option value="house">Maison</option>
+              <option value="studio">Studio</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Budget max (€)</label>
+              <input type="number" id="maxPrice" placeholder="1500" />
+            </div>
+            <div class="form-group">
+              <label>Surface min (m²)</label>
+              <input type="number" id="minSurface" placeholder="40" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Pièces minimum</label>
+            <div class="rooms-selector">
+              <button type="button" class="room-btn active" data-rooms="0">Tous</button>
+              <button type="button" class="room-btn" data-rooms="1">1+</button>
+              <button type="button" class="room-btn" data-rooms="2">2+</button>
+              <button type="button" class="room-btn" data-rooms="3">3+</button>
+              <button type="button" class="room-btn" data-rooms="4">4+</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Sites à scraper</label>
+            <div class="sites-grid">
+              <label class="site-check">
+                <input type="checkbox" name="sites" value="pap" checked />
+                <span class="site-badge pap">PAP</span>
+              </label>
+              <label class="site-check">
+                <input type="checkbox" name="sites" value="seloger" checked />
+                <span class="site-badge seloger">SeLoger</span>
+              </label>
+              <label class="site-check">
+                <input type="checkbox" name="sites" value="leboncoin" />
+                <span class="site-badge leboncoin">LeBonCoin</span>
+              </label>
+              <label class="site-check">
+                <input type="checkbox" name="sites" value="idealista" />
+                <span class="site-badge idealista">Idealista</span>
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-create-agent">
+            <span>🤖</span> Lancer l'agent
+          </button>
+        </form>
+      </div>
+
+      <!-- Sites info -->
+      <div class="sidebar-section">
+        <h3 class="section-title">Sites disponibles</h3>
+        <div id="sitesList" class="sites-list">
+          <div class="loading-sites">Chargement...</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main">
+      <!-- Header -->
+      <header class="main-header">
+        <div class="header-info">
+          <h1 id="currentAgentName">Aucun agent actif</h1>
+          <p id="currentAgentDesc" class="agent-desc">Configurez et lancez un agent dans le panneau de gauche</p>
+        </div>
+        <div class="header-actions">
+          <button id="clearChat" class="btn-secondary" onclick="clearChat()">
+            🗑️ Vider le chat
+          </button>
+        </div>
+      </header>
+
+      <!-- Chat area -->
+      <div class="chat-container">
+        <div id="messages" class="messages">
+          <div class="welcome-message">
+            <div class="welcome-icon">🏠</div>
+            <h2>Bienvenue sur ImmoAgent</h2>
+            <p>Je suis votre agent immobilier IA. Configurez votre recherche à gauche et lancez l'agent, ou discutez directement avec moi !</p>
+            <div class="quick-prompts">
+              <button class="quick-prompt" onclick="sendQuickPrompt('Je cherche un appartement 2 pièces à Paris pour moins de 1500€/mois')">
+                🗼 Appart 2P Paris &lt;1500€
+              </button>
+              <button class="quick-prompt" onclick="sendQuickPrompt('Trouve-moi une maison à acheter à Lyon avec jardin, budget 400 000€')">
+                🌿 Maison Lyon avec jardin
+              </button>
+              <button class="quick-prompt" onclick="sendQuickPrompt('Quels sont les meilleurs quartiers pour louer à Bordeaux ?')">
+                🍇 Conseils Bordeaux
+              </button>
+              <button class="quick-prompt" onclick="sendQuickPrompt('Compare les prix immobiliers entre Paris et Lyon')">
+                📊 Paris vs Lyon
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Input -->
+        <div class="chat-input-area">
+          <div class="input-wrapper">
+            <textarea
+              id="userInput"
+              placeholder="Décrivez ce que vous cherchez... ex: appartement 3 pièces à Bordeaux, max 1200€/mois, proche transports"
+              rows="1"
+            ></textarea>
+            <button id="sendBtn" onclick="sendMessage()" class="send-btn" disabled>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            </button>
+          </div>
+          <p class="input-hint">Appuyez sur Entrée pour envoyer, Maj+Entrée pour une nouvelle ligne</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
