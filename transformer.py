@@ -3,8 +3,18 @@ Implémentation d'une architecture Transformer from scratch en Python.
 Basée sur le papier "Attention Is All You Need" (Vaswani et al., 2017).
 """
 
+import logging
 import math
 import numpy as np
+
+
+# Configuration du logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%H:%M:%S",
+)
+logger = logging.getLogger(__name__)
 
 
 # ─────────────────────────────────────────────
@@ -470,9 +480,9 @@ class Transformer:
 # ─────────────────────────────────────────────
 
 if __name__ == "__main__":
-    print("=" * 60)
-    print("  Transformer from scratch — démonstration")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("  Transformer from scratch — démonstration")
+    logger.info("=" * 60)
 
     # Hyperparamètres réduits pour la démo
     SRC_VOCAB = 100
@@ -503,28 +513,28 @@ if __name__ == "__main__":
     src[:, -1] = 0
     tgt[:, -1] = 0
 
-    print(f"\nSéquence source  : shape {src.shape}")
-    print(f"Séquence cible   : shape {tgt.shape}\n")
+    logger.info("Séquence source  : shape %s", src.shape)
+    logger.info("Séquence cible   : shape %s", tgt.shape)
 
     # Passage avant
     logits = model.forward(src, tgt)
 
-    print(f"Logits           : shape {logits.shape}  (batch, tgt_seq, tgt_vocab)")
+    logger.info("Logits           : shape %s  (batch, tgt_seq, tgt_vocab)", logits.shape)
 
     predictions = model.predict(logits)
-    print(f"Prédictions      : shape {predictions.shape}")
-    print(f"Tokens prédits   :\n{predictions}\n")
+    logger.info("Prédictions      : shape %s", predictions.shape)
+    logger.info("Tokens prédits   :\n%s", predictions)
 
     # Vérification de l'encodage positionnel
     PE = positional_encoding(10, D_MODEL)
-    print(f"Encodage positionnel (10 pos, d={D_MODEL}) : shape {PE.shape}")
-    print(f"Valeurs PE[0,:4] = {PE[0, :4].round(4)}")
-    print(f"Valeurs PE[1,:4] = {PE[1, :4].round(4)}")
+    logger.info("Encodage positionnel (10 pos, d=%d) : shape %s", D_MODEL, PE.shape)
+    logger.info("Valeurs PE[0,:4] = %s", PE[0, :4].round(4))
+    logger.info("Valeurs PE[1,:4] = %s", PE[1, :4].round(4))
 
     # Vérification des poids d'attention (dernière couche de l'encodeur)
     enc_layer   = model.encoder.layers[-1]
     attn_w      = enc_layer.self_attn.attn_weights   # (batch, heads, seq, seq)
-    print(f"\nPoids d'attention (dernière couche encodeur) : shape {attn_w.shape}")
-    print(f"Somme sur l'axe seq_k (doit ≈ 1) : {attn_w[0, 0].sum(axis=-1).round(4)}")
+    logger.info("Poids d'attention (dernière couche encodeur) : shape %s", attn_w.shape)
+    logger.info("Somme sur l'axe seq_k (doit ≈ 1) : %s", attn_w[0, 0].sum(axis=-1).round(4))
 
-    print("\nDone.")
+    logger.info("Done.")
